@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      html,
+      body,
+      header {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      (null != localStorage.CONFIG_LANGUAGE &&
+        null != localStorage.CONFIG_VERSION) ||
+        (location = "/config.html"),
+        (handler = function (e) {
+          if(121==e.keyCode){
+            location="/config.html"
+        }}),
+        window.addEventListener("keydown", handler),
+        (url =
+          "../logos/2020/kitsune/" +
+          localStorage.CONFIG_VERSION +
+          "/kitsune20.html"),
+        w=window.open(url,'Doodle Champion Island Games','popup')
+        w.document.body.innerHTML.replaceAll("https://www.gstatic.com/","/gstatic/")
+        window.close()
+    </script>
+  </body>
+</html>

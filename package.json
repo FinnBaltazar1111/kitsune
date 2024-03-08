@@ -1,0 +1,15 @@
+{
+    "name": "Kitsune",
+    "main": "silica/run.html",
+    "window": {
+        "title": "Kitsune",
+        "width": 960,
+        "height": 544,
+        "icon": "silica/icon.png"
+    },
+    "dependencies": {
+        "fs": "^0.0.1-security",
+        "http": "^0.0.1-security",
+        "requirejs": "^2.3.6"
+    }
+}
