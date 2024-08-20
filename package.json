@@ -9,8 +9,11 @@
     },
     "dependencies": {
         "fs": "^0.0.1-security",
+        "gh-pages": "^6.1.1",
         "http": "^0.0.1-security",
-        "requirejs": "^2.3.6",
-        "gh-pages": "^6.1.1"
-    }
+        "requirejs": "^2.3.6"
+    },
+    "scripts": {
+    "deploy": "gh-pages -d build"
+}
 }
