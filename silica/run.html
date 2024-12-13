@@ -1,21 +1,10 @@
-<html>
-	<head>
-		<meta charset="UTF-8">
-		<style>
-		html,body,header {
-			margin: 0;
-			padding: 0;
-		}
-		</style>
-	</head>
-	
-	<body>
-		<script>
-      		  urlparams=new URLSearchParams(window.location.search);
-		  if(localStorage["CONFIG_LANGUAGE"]==undefined||localStorage["CONFIG_VERSION"]==undefined){location = "/silica/config.html";};
-		  if(urlparams.get('cheats')==='true'){url='/logos/2020/kitsune/'+localStorage["CONFIG_VERSION"]+'/kitsune20.html?cheats=true'}else{url=url='/logos/2020/kitsune/'+localStorage["CONFIG_VERSION"]+'/kitsune20.html'};
-      		  w=window.open(url,'_self');
-		  w.document.body.innerHTML.replaceAll("https://www.gstatic.com/","../gstatic/");
-		</script>
-	</body>
+<html><head><meta charset="UTF-8"><style>html,body,header{margin:0;padding: 0;}</style></head><body>
+<script>
+urlparams=new URLSearchParams(window.location.search);
+	if(localStorage["CONFIG_LANGUAGE"]==undefined||localStorage["CONFIG_VERSION"]==undefined){location = "/silica/config.html";};
+	if(urlparams.get('cheats')==='true'){url='../logos/2020/kitsune/'+localStorage["CONFIG_VERSION"]+'/kitsune20.html?cheats=true'}else{url=url='../logos/2020/kitsune/'+localStorage["CONFIG_VERSION"]+'/kitsune20.html'};
+      	w=window.open(url,'_self');
+	w.document.body.innerHTML.replaceAll("https://www.gstatic.com/","../gstatic/");
+</script>
+</body>
 </html>
