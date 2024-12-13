@@ -2,6 +2,7 @@
   <head><meta charset="UTF-8"/><style>html,body,header{margin:0;padding:0;}</style></head>
   <body>
     <script>
+      const urlparams=new URLSearchParams(window.location.search);
       (null != localStorage.CONFIG_LANGUAGE &&
         null != localStorage.CONFIG_VERSION) ||
         (location = "/config.html"),
@@ -10,14 +11,10 @@
             location="/config.html"
         }}),
         window.addEventListener("keydown", handler),
-        (url =
-          "../logos/2020/kitsune/" +
-          localStorage.CONFIG_VERSION +
-          "/kitsune20.html"),
+        (if (urlparams.get('cheats'==='true')){url="../logos/2020/kitsune/"+localStorage.CONFIG_VERSION+"/kitsune20.html?cheats=true"}else{url="../logos/2020/kitsune/"+localStorage.CONFIG_VERSION+"/kitsune20.html"}),
         w=window.open(url,'_self')
         w.document.body.innerHTML.replaceAll("https://www.gstatic.com/","/gstatic/")
-        const urlparams=new URLSearchParams(window.location.search);
-        if (urlparams.get('cheats')==true){var url=new URL(w.document.location);url.searchParams.append('cheats','true');w.document.location=url.href;}
+        
     </script>
   </body>
 </html>
