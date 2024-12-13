@@ -99,6 +99,9 @@
       <button onclick="exportSave()">Export Savefile</button>
       <button onclick="importSave()">Import Savefile</button>
       <hr />
+      <b>CHEATS:</b><br />
+      <input type='checkbox' id='cheatToggle'> Cheats
+      <hr />
       <br />
       <button onclick="save()" id="startButton">Start Game</button>
       <br />
@@ -295,7 +298,11 @@
       };
 
       redirect = function () {
-        window.open("run.html","_blank",'location=no,height=0,width=0,scrollbars=no,status=no');
+        if (!document.getElementById('cheatToggle').checked){
+          window.open("run.html","_blank",'location=no,height=0,width=0,scrollbars=no,status=no');
+        } else {
+          window.open("run.html?cheats=true","_blank",'location=no,height=0,width=0,scrollbars=no,status=no');
+        }
       };
       populate = function () {
         opt=document.createElement("option");
