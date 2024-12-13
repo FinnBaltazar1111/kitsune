@@ -11,10 +11,9 @@
             location="/config.html"
         }}),
         window.addEventListener("keydown", handler),
-        (if (urlparams.get('cheats'==='true')){url="../logos/2020/kitsune/"+localStorage.CONFIG_VERSION+"/kitsune20.html?cheats=true"}else{url="../logos/2020/kitsune/"+localStorage.CONFIG_VERSION+"/kitsune20.html"}),
-        w=window.open(url,'_self')
+        (url="../logos/2020/kitsune/"+localStorage.CONFIG_VERSION+"/kitsune20.html"),
+        if (urlparams.get('cheats')==='true'){w=window.open(url+'?cheats=true','_self');}else{w=window.open(url,'_self')}
         w.document.body.innerHTML.replaceAll("https://www.gstatic.com/","/gstatic/")
-        
     </script>
   </body>
 </html>
