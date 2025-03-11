@@ -3,7 +3,7 @@
 urlparams=new URLSearchParams(window.location.search);
 	if(localStorage["CONFIG_LANGUAGE"]==undefined||localStorage["CONFIG_VERSION"]==undefined){location = "/silica/config.html";};
 	if(urlparams.get('cheats')==='true'){url='../logos/2020/kitsune/'+localStorage["CONFIG_VERSION"]+'/kitsune20.html?cheats=true'}else{url=url='../logos/2020/kitsune/'+localStorage["CONFIG_VERSION"]+'/kitsune20.html'};
-      	w=window.open(url,'_blank');
+      	w=window.open(url,'_blank','location=no,height=0,width=0,scrollbars=no,status=no');
 	w.document.body.innerHTML.replaceAll("https://www.gstatic.com/","../gstatic/");
 </script>
 </body>
