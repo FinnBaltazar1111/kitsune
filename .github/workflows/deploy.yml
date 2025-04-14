@@ -5,6 +5,9 @@ jobs:
     deploy:
       runs-on: ubuntu-latest
       steps:
+        - name: Checkout Repo
+          uses: actions/checkout@v4
+      
         - name: Deploy
           uses: JamesIves/github-pages-deploy-action@4.1.0
           with:
