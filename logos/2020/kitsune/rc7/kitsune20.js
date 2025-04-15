@@ -1,8 +1,3 @@
-/*
-
- Copyright The Closure Library Authors.
- SPDX-License-Identifier: Apache-2.0
-*/
 var l,aa=function(b){var g=0;return function(){return g<b.length?{done:!1,value:b[g++]}:{done:!0}}},ba="function"==typeof Object.defineProperties?Object.defineProperty:function(b,g,m){if(b==Array.prototype||b==Object.prototype)return b;b[g]=m.value;return b},ca=function(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var g=0;g<b.length;++g){var m=b[g];if(m&&m.Math==Math)return m}throw Error("a");},da=
 ca(this),ea=function(b,g){if(g)a:{var m=da;b=b.split(".");for(var k=0;k<b.length-1;k++){var c=b[k];if(!(c in m))break a;m=m[c]}b=b[b.length-1];k=m[b];g=g(k);g!=k&&null!=g&&ba(m,b,{configurable:!0,writable:!0,value:g})}};
 ea("Symbol",function(b){if(b)return b;var g=function(a,n){this.ha=a;ba(this,"description",{configurable:!0,writable:!0,value:n})};g.prototype.toString=function(){return this.ha};var m="jscomp_symbol_"+(1E9*Math.random()>>>0)+"_",k=0,c=function(a){if(this instanceof c)throw new TypeError("b");return new g(m+(a||"")+"_"+k++,a)};return c});
