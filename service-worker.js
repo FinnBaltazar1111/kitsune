@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kitsune-offline-v4';
+const CACHE_NAME = 'kitsune-offline-v5';
 
 // Resources to cache for offline play
 const GAME_RESOURCES = [
@@ -217,6 +217,15 @@ self.addEventListener('fetch', (event) => {
       const cache = await caches.open(CACHE_NAME);
       const keys = await cache.keys();
 
+      // Handle root URL - serve index.html
+      const pathname = url.pathname;
+      if (pathname === '/' || pathname.endsWith('/kitsune/') || pathname.endsWith('/kitsune')) {
+        const indexKey = keys.find((key) => key.url.endsWith('/index.html'));
+        if (indexKey) {
+          return cache.match(indexKey);
+        }
+      }
+
       // If this is a gstatic request, find the local cached version
       if (localPath) {
         const matchingKey = keys.find((key) => {
@@ -230,7 +239,6 @@ self.addEventListener('fetch', (event) => {
       }
 
       // Try to match by pathname for local resources
-      const pathname = url.pathname;
       const matchingKey = keys.find((key) => {
         const keyUrl = new URL(key.url);
         return keyUrl.pathname === pathname ||
