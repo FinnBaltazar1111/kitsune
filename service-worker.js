@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kitsune-offline-v1';
+const CACHE_NAME = 'kitsune-offline-v2';
 
 // Resources to cache for offline play
 const GAME_RESOURCES = [
@@ -22,11 +22,11 @@ const GAME_RESOURCES = [
   './logos/2020/kitsune/rc7/pingpong-sprite.png',
   './logos/2020/kitsune/rc7/rugby-sprite.png',
   './logos/2020/kitsune/rc7/skate-sprite.png',
-  './logos/2020/kitsune/rc7/swimming-sprite.png',
+  './logos/2020/kitsune/rc7/swim-sprite.png',
+  './logos/2020/kitsune/rc7/shared-sprite.png',
+  './logos/2020/kitsune/rc7/preload-sprite.png',
 
   // CTA images
-  './logos/2020/kitsune/rc7/cta.png',
-  './logos/2020/kitsune/rc7/cta_play.png',
   './logos/2020/kitsune/rc7/CTA-Archery-174787996-174787824.png',
   './logos/2020/kitsune/rc7/CTA-Closing-174787829-192414335.png',
   './logos/2020/kitsune/rc7/CTA-Marathon-174788017-174787794.png',
@@ -64,11 +64,10 @@ const GAME_RESOURCES = [
   './logos/2020/kitsune/rc7/shared.ogg',
   './logos/2020/kitsune/rc7/skate.mp3',
   './logos/2020/kitsune/rc7/skate.ogg',
-  './logos/2020/kitsune/rc7/swimming.mp3',
-  './logos/2020/kitsune/rc7/swimming.ogg',
 
   // Video files (intro/outro for each event)
   './logos/2020/kitsune/rc7/intro.mp4',
+  './logos/2020/kitsune/rc7/outro.mp4',
   './logos/2020/kitsune/rc7/archeryintro.mp4',
   './logos/2020/kitsune/rc7/archeryoutro.mp4',
   './logos/2020/kitsune/rc7/climbingintro.mp4',
@@ -81,8 +80,8 @@ const GAME_RESOURCES = [
   './logos/2020/kitsune/rc7/rugbyoutro.mp4',
   './logos/2020/kitsune/rc7/skateintro.mp4',
   './logos/2020/kitsune/rc7/skateoutro.mp4',
-  './logos/2020/kitsune/rc7/swimmingintro.mp4',
-  './logos/2020/kitsune/rc7/swimmingoutro.mp4',
+  './logos/2020/kitsune/rc7/swimintro.mp4',
+  './logos/2020/kitsune/rc7/swimoutro.mp4',
 
   // Localization files (all languages)
   './logos/2020/kitsune/rc7/messages.af.nocache.json',
@@ -106,9 +105,7 @@ const GAME_RESOURCES = [
   './logos/2020/kitsune/rc7/messages.eu.nocache.json',
   './logos/2020/kitsune/rc7/messages.fa.nocache.json',
   './logos/2020/kitsune/rc7/messages.fi.nocache.json',
-  './logos/2020/kitsune/rc7/messages.fil.nocache.json',
   './logos/2020/kitsune/rc7/messages.fr.nocache.json',
-  './logos/2020/kitsune/rc7/messages.fr-ca.nocache.json',
   './logos/2020/kitsune/rc7/messages.gl.nocache.json',
   './logos/2020/kitsune/rc7/messages.gu.nocache.json',
   './logos/2020/kitsune/rc7/messages.hi.nocache.json',
