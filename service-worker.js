@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kitsune-offline-v2';
+const CACHE_NAME = 'kitsune-offline-v3';
 
 // Resources to cache for offline play
 const GAME_RESOURCES = [
@@ -195,7 +195,26 @@ self.addEventListener('fetch', (event) => {
       if (cachedResponse) {
         return cachedResponse;
       }
-      return fetch(event.request);
+      // Try to match by pathname if direct match fails
+      const url = new URL(event.request.url);
+      const pathname = url.pathname;
+
+      return caches.open(CACHE_NAME).then((cache) => {
+        return cache.keys().then((keys) => {
+          // Find a cached entry that matches the pathname
+          const matchingKey = keys.find((key) => {
+            const keyUrl = new URL(key.url);
+            return keyUrl.pathname === pathname ||
+                   keyUrl.pathname.endsWith(pathname) ||
+                   pathname.endsWith(keyUrl.pathname.replace(/^\./, ''));
+          });
+
+          if (matchingKey) {
+            return cache.match(matchingKey);
+          }
+          return fetch(event.request);
+        });
+      });
     })
   );
 });
