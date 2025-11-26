@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kitsune-offline-v3';
+const CACHE_NAME = 'kitsune-offline-v4';
 
 // Resources to cache for offline play
 const GAME_RESOURCES = [
@@ -186,36 +186,73 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Map gstatic.com URLs to local paths
+function mapGstaticToLocal(url) {
+  const gstaticPrefix = 'https://www.gstatic.com/external_hosted/';
+  if (url.startsWith(gstaticPrefix)) {
+    const localPath = url.replace(gstaticPrefix, '/gstatic/externally_hosted/');
+    return localPath;
+  }
+  return null;
+}
+
 // Fetch event - serve from cache if available
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
+  const requestUrl = event.request.url;
+  const url = new URL(requestUrl);
+
+  // Handle gstatic.com requests by mapping to local cache
+  const localPath = mapGstaticToLocal(requestUrl);
+
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    (async () => {
+      // First try direct cache match
+      const cachedResponse = await caches.match(event.request);
       if (cachedResponse) {
         return cachedResponse;
       }
-      // Try to match by pathname if direct match fails
-      const url = new URL(event.request.url);
-      const pathname = url.pathname;
 
-      return caches.open(CACHE_NAME).then((cache) => {
-        return cache.keys().then((keys) => {
-          // Find a cached entry that matches the pathname
-          const matchingKey = keys.find((key) => {
-            const keyUrl = new URL(key.url);
-            return keyUrl.pathname === pathname ||
-                   keyUrl.pathname.endsWith(pathname) ||
-                   pathname.endsWith(keyUrl.pathname.replace(/^\./, ''));
-          });
+      const cache = await caches.open(CACHE_NAME);
+      const keys = await cache.keys();
 
-          if (matchingKey) {
-            return cache.match(matchingKey);
-          }
-          return fetch(event.request);
+      // If this is a gstatic request, find the local cached version
+      if (localPath) {
+        const matchingKey = keys.find((key) => {
+          const keyUrl = new URL(key.url);
+          return keyUrl.pathname === localPath ||
+                 keyUrl.pathname.endsWith(localPath.replace(/^\//, ''));
         });
+        if (matchingKey) {
+          return cache.match(matchingKey);
+        }
+      }
+
+      // Try to match by pathname for local resources
+      const pathname = url.pathname;
+      const matchingKey = keys.find((key) => {
+        const keyUrl = new URL(key.url);
+        return keyUrl.pathname === pathname ||
+               keyUrl.pathname.endsWith(pathname.replace(/^\//, '')) ||
+               pathname.endsWith(keyUrl.pathname.replace(/^.*\//, ''));
       });
-    })
+
+      if (matchingKey) {
+        return cache.match(matchingKey);
+      }
+
+      // Fall back to network
+      try {
+        return await fetch(event.request);
+      } catch (error) {
+        // If offline and no cache match, return a simple error
+        return new Response('Offline - resource not cached', {
+          status: 503,
+          statusText: 'Service Unavailable'
+        });
+      }
+    })()
   );
 });
 
