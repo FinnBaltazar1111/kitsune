@@ -99,6 +99,12 @@
       <button onclick="exportSave()">Export Savefile</button>
       <button onclick="importSave()">Import Savefile</button>
       <hr />
+      <b>OFFLINE PLAY:</b><br />
+      <div id="cacheStatus">Checking cache status...</div>
+      <button onclick="cacheForOffline()" id="cacheButton" disabled>Cache for Offline Play</button>
+      <button onclick="clearOfflineCache()" id="clearCacheButton" style="display:none;">Clear Cache</button>
+      <div id="cacheProgress"></div>
+      <hr />
       <b>CHEATS:</b><br />
       <input type='checkbox' id='cheatToggle'> Cheats
       <hr />
@@ -408,6 +414,98 @@
 
       populate();
       loadSettings();
+
+      // Service Worker and Offline Caching
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then((registration) => {
+            console.log('Service Worker registered');
+            checkCacheStatus();
+          })
+          .catch((error) => {
+            console.error('Service Worker registration failed:', error);
+            document.getElementById('cacheStatus').innerText = 'Offline caching not available';
+          });
+
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data.type === 'cache-progress') {
+            const percent = Math.round((event.data.cached / event.data.total) * 100);
+            document.getElementById('cacheProgress').innerText =
+              'Caching: ' + event.data.cached + '/' + event.data.total + ' (' + percent + '%)';
+          } else if (event.data.type === 'cache-complete') {
+            document.getElementById('cacheProgress').innerText =
+              'Complete! Cached ' + event.data.cached + ' files' +
+              (event.data.failed > 0 ? ' (' + event.data.failed + ' failed)' : '');
+            document.getElementById('cacheButton').disabled = false;
+            document.getElementById('cacheButton').innerText = 'Cache for Offline Play';
+            checkCacheStatus();
+          } else if (event.data.type === 'cache-status') {
+            updateCacheStatusUI(event.data);
+          } else if (event.data.type === 'cache-cleared') {
+            document.getElementById('cacheProgress').innerText = event.data.success ? 'Cache cleared!' : 'Failed to clear cache';
+            checkCacheStatus();
+          }
+        });
+      } else {
+        document.getElementById('cacheStatus').innerText = 'Offline caching not supported in this browser';
+      }
+
+      function checkCacheStatus() {
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ action: 'get-cache-status' });
+        } else {
+          navigator.serviceWorker.ready.then((registration) => {
+            registration.active.postMessage({ action: 'get-cache-status' });
+          });
+        }
+      }
+
+      function updateCacheStatusUI(data) {
+        const statusEl = document.getElementById('cacheStatus');
+        const cacheBtn = document.getElementById('cacheButton');
+        const clearBtn = document.getElementById('clearCacheButton');
+
+        if (data.isCached) {
+          statusEl.innerText = 'Ready for offline play (' + data.cached + '/' + data.total + ' files cached)';
+          cacheBtn.innerText = 'Update Cache';
+          clearBtn.style.display = 'inline';
+        } else if (data.cached > 0) {
+          statusEl.innerText = 'Partially cached (' + data.cached + '/' + data.total + ' files)';
+          cacheBtn.innerText = 'Complete Cache';
+          clearBtn.style.display = 'inline';
+        } else {
+          statusEl.innerText = 'Not cached for offline play';
+          cacheBtn.innerText = 'Cache for Offline Play';
+          clearBtn.style.display = 'none';
+        }
+        cacheBtn.disabled = false;
+      }
+
+      cacheForOffline = function() {
+        document.getElementById('cacheButton').disabled = true;
+        document.getElementById('cacheButton').innerText = 'Caching...';
+        document.getElementById('cacheProgress').innerText = 'Starting...';
+
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ action: 'cache-resources' });
+        } else {
+          navigator.serviceWorker.ready.then((registration) => {
+            registration.active.postMessage({ action: 'cache-resources' });
+          });
+        }
+      };
+
+      clearOfflineCache = function() {
+        if (confirm('Are you sure you want to clear the offline cache?')) {
+          if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ action: 'clear-cache' });
+          } else {
+            navigator.serviceWorker.ready.then((registration) => {
+              registration.active.postMessage({ action: 'clear-cache' });
+            });
+          }
+        }
+      };
     </script>
   </body>
 </html>
