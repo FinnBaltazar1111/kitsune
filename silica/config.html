@@ -106,7 +106,8 @@
       <div id="cacheProgress"></div>
       <hr />
       <b>CHEATS:</b><br />
-      <input type='checkbox' id='cheatToggle'> Cheats
+      <input type='checkbox' id='cheatToggle'> Cheats<br />
+      <input type='checkbox' id='tasToggle'> TAS Tools (Tool-Assisted Speedrun)
       <hr />
       <br />
       <button onclick="save()" id="startButton">Start Game</button>
@@ -302,13 +303,19 @@
         element.click();
         document.body.removeChild(element);
       };
-
       redirect = function () {
-        if (!document.getElementById('cheatToggle').checked){
-          window.open("/silica/run.html","_self",'location=no,height=0,width=0,scrollbars=no,status=no');
-        } else {
-          window.open("/silica/run.html?cheats=true","_self",'location=no,height=0,width=0,scrollbars=no,status=no');
+        var params = [];
+        if (document.getElementById('cheatToggle').checked) {
+          params.push('cheats=true');
         }
+        if (document.getElementById('tasToggle').checked) {
+          params.push('tas=true');
+        }
+        var url = "/silica/run.html";
+        if (params.length > 0) {
+          url += "?" + params.join("\&");
+        }
+        window.open(url,"_self",'location=no,height=0,width=0,scrollbars=no,status=no');
       };
       populate = function () {
         opt=document.createElement("option");
