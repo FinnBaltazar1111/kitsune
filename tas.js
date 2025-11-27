@@ -445,18 +445,43 @@
 
         /**
          * Start playing back a recorded sequence
-         * @param {Array} sequence - Array of input states to play
+         * @param {Array} [sequence] - Array of input states to play. If not provided, uses the current recording.
          */
         startPlayback: function(sequence) {
-            if (!sequence || sequence.length === 0) {
-                console.warn('[TAS] No sequence to play');
+            // If no sequence provided, use the current recording
+            if (sequence === undefined) {
+                sequence = this._recording;
+            }
+
+            // Handle string input (JSON)
+            if (typeof sequence === 'string') {
+                try {
+                    sequence = JSON.parse(sequence);
+                } catch (e) {
+                    console.error('[TAS] Failed to parse sequence JSON:', e);
+                    return;
+                }
+            }
+
+            // Handle array input (already parsed)
+            if (Array.isArray(sequence) && sequence.length > 0) {
+                this._recording = sequence;
+            }
+
+            if (!this._recording || !Array.isArray(this._recording) || this._recording.length === 0) {
+                console.warn('[TAS] No sequence to play. Use TAS.importRecording(json) first or pass a sequence.');
                 return;
             }
 
-            this._recording = sequence;
+            // Ensure the game tick is hooked for playback
+            if (!this._tickHooked) {
+                this._hookGameTick();
+            }
+
             this._playbackIndex = 0;
             this._isPlaying = true;
-            console.log('[TAS] Playback started. ' + sequence.length + ' frames to play.');
+            this._isRecording = false; // Stop recording if it was active
+            console.log('[TAS] Playback started. ' + this._recording.length + ' frames to play.');
         },
 
         /**
@@ -521,15 +546,30 @@
         },
 
         /**
-         * Import recording from JSON string
-         * @param {string} json - JSON string of recorded inputs
+         * Import recording from JSON string or array
+         * @param {string|Array} data - JSON string or array of recorded inputs
          */
-        importRecording: function(json) {
+        importRecording: function(data) {
             try {
-                this._recording = JSON.parse(json);
-                console.log('[TAS] Imported ' + this._recording.length + ' frames');
+                // Handle array input directly
+                if (Array.isArray(data)) {
+                    this._recording = data;
+                    console.log('[TAS] Imported ' + this._recording.length + ' frames (from array)');
+                    return true;
+                }
+
+                // Handle JSON string
+                if (typeof data === 'string') {
+                    this._recording = JSON.parse(data);
+                    console.log('[TAS] Imported ' + this._recording.length + ' frames (from JSON)');
+                    return true;
+                }
+
+                console.error('[TAS] Invalid import data type. Expected array or JSON string.');
+                return false;
             } catch (e) {
                 console.error('[TAS] Failed to import recording:', e);
+                return false;
             }
         },
 
