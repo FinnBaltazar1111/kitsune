@@ -354,8 +354,10 @@
             if (state.right) this.right();
             if (state.up) this.up();
             if (state.down) this.down();
-            if (state.action) this.action();
-            if (state.cancel) this.cancel();
+            // Directly press Enter key (13) for action
+            if (state.action) this.pressKey(13);
+            // Directly press Backspace key (8) for cancel
+            if (state.cancel) this.pressKey(8);
         },
 
         // ==================== RECORDING & PLAYBACK ====================
