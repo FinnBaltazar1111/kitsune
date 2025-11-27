@@ -26,6 +26,7 @@
         _playbackIndex: 0,
         _frameCount: 0,
         _originalTick: null,
+        _tickHooked: false,
 
         // Direction constants
         DIRECTION: {
@@ -142,6 +143,11 @@
         /**
          * Simulate pressing a direction
          * @param {number} direction - Direction index (0-5)
+         *
+         * The Ih (keyboard handler) structure:
+         * - Ea: direction → key array mappings {0: [37,65], 1: [39,68], 2: [38,87], 3: [40,83], 4: [32,13], 5: [8,49,46]}
+         * - tb: key → direction reverse mapping
+         * - Ob: key → boolean pressed state
          */
         pressDirection: function(direction) {
             if (!this._keyboardHandler) {
@@ -149,10 +155,23 @@
                 return;
             }
             const keyMappings = this._keyboardHandler.Ea;
-            if (keyMappings && keyMappings[direction]) {
+            if (keyMappings && keyMappings[direction] && keyMappings[direction].length > 0) {
                 // Press the first key mapped to this direction
                 const keyCode = keyMappings[direction][0];
                 this.pressKey(keyCode);
+            } else {
+                // Fallback: use hardcoded key mappings
+                const fallbackKeys = {
+                    0: 37,  // LEFT arrow
+                    1: 39,  // RIGHT arrow
+                    2: 38,  // UP arrow
+                    3: 40,  // DOWN arrow
+                    4: 32,  // SPACE (action)
+                    5: 8    // BACKSPACE (cancel)
+                };
+                if (fallbackKeys[direction] !== undefined) {
+                    this.pressKey(fallbackKeys[direction]);
+                }
             }
         },
 
@@ -166,10 +185,25 @@
                 return;
             }
             const keyMappings = this._keyboardHandler.Ea;
-            if (keyMappings && keyMappings[direction]) {
+            if (keyMappings && keyMappings[direction] && keyMappings[direction].length > 0) {
                 // Release all keys mapped to this direction
                 for (const keyCode of keyMappings[direction]) {
                     this.releaseKey(keyCode);
+                }
+            } else {
+                // Fallback: use hardcoded key mappings
+                const fallbackKeys = {
+                    0: [37, 65],   // LEFT arrow, A
+                    1: [39, 68],   // RIGHT arrow, D
+                    2: [38, 87],   // UP arrow, W
+                    3: [40, 83],   // DOWN arrow, S
+                    4: [32, 13],   // SPACE, ENTER (action)
+                    5: [8, 49, 46] // BACKSPACE, 1, DELETE (cancel)
+                };
+                if (fallbackKeys[direction]) {
+                    for (const keyCode of fallbackKeys[direction]) {
+                        this.releaseKey(keyCode);
+                    }
                 }
             }
         },
@@ -279,19 +313,29 @@
         // ==================== INPUT STATE ====================
 
         /**
-         * Get current input state
+         * Get current input state from the input manager (Kh)
+         * The input manager's tb object contains boolean states for each direction:
+         * - tb[0]: left
+         * - tb[1]: right
+         * - tb[2]: up
+         * - tb[3]: down
+         * - tb[4]: action
+         * - tb[5]: cancel
          * @returns {Object} Current state of all directions
          */
         getInputState: function() {
             if (!this._inputManager) return null;
 
+            // Kh.tb is an object, not array, so we check with ||
+            const tb = this._inputManager.tb || {};
+
             return {
-                left: this._inputManager.tb[0] || false,
-                right: this._inputManager.tb[1] || false,
-                up: this._inputManager.tb[2] || false,
-                down: this._inputManager.tb[3] || false,
-                action: this._inputManager.tb[4] || false,
-                cancel: this._inputManager.tb[5] || false,
+                left: !!tb[0],
+                right: !!tb[1],
+                up: !!tb[2],
+                down: !!tb[3],
+                action: !!tb[4],
+                cancel: !!tb[5],
                 vector: this._inputManager.ha ? {
                     x: this._inputManager.ha.x,
                     y: this._inputManager.ha.y
@@ -318,11 +362,18 @@
 
         /**
          * Start recording inputs
+         * This hooks into the game's tick loop to capture inputs each frame
          */
         startRecording: function() {
             this._recording = [];
             this._isRecording = true;
             this._frameCount = 0;
+
+            // Hook into the game's tick loop if not already hooked
+            if (!this._tickHooked) {
+                this._hookGameTick();
+            }
+
             console.log('[TAS] Recording started');
         },
 
@@ -337,6 +388,36 @@
         },
 
         /**
+         * Hook into the game's tick loop for automatic recording/playback
+         */
+        _hookGameTick: function() {
+            if (this._tickHooked) return;
+
+            const self = this;
+
+            // Try to hook into Vv.prototype.tick (game main tick)
+            if (typeof Vv !== 'undefined' && Vv.prototype && Vv.prototype.tick) {
+                const originalTick = Vv.prototype.tick;
+                Vv.prototype.tick = function(b) {
+                    // Call original tick first
+                    originalTick.call(this, b);
+
+                    // Then do our recording/playback after input has been processed
+                    if (self._isRecording) {
+                        self.recordFrame();
+                    }
+                    if (self._isPlaying) {
+                        self.playbackFrame();
+                    }
+                };
+                this._tickHooked = true;
+                console.log('[TAS] Hooked into game tick (Vv.prototype.tick)');
+            } else {
+                console.warn('[TAS] Could not hook into game tick. Recording may not work automatically.');
+            }
+        },
+
+        /**
          * Record current frame's input state (call this each game tick)
          */
         recordFrame: function() {
@@ -344,6 +425,10 @@
 
             const state = this.getInputState();
             if (state) {
+                // Only record if there's any input (to save space)
+                const hasInput = state.left || state.right || state.up || state.down ||
+                                 state.action || state.cancel;
+
                 this._recording.push({
                     frame: this._frameCount,
                     left: state.left,
@@ -351,7 +436,8 @@
                     up: state.up,
                     down: state.down,
                     action: state.action,
-                    cancel: state.cancel
+                    cancel: state.cancel,
+                    hasInput: hasInput
                 });
             }
             this._frameCount++;
@@ -586,7 +672,11 @@
     // Auto-initialize when DOM is ready, with retry
     const tryInit = function(attempts) {
         if (TAS.init()) {
+            // Also hook into game tick for recording/playback
+            TAS._hookGameTick();
             console.log('[TAS] Ready! Use TAS.logState() to see current state.');
+            console.log('[TAS] Commands: TAS.action(), TAS.left(), TAS.right(), TAS.up(), TAS.down()');
+            console.log('[TAS] Recording: TAS.startRecording(), TAS.stopRecording(), TAS.exportRecording()');
         } else if (attempts > 0) {
             setTimeout(function() { tryInit(attempts - 1); }, 500);
         }
