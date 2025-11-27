@@ -231,9 +231,9 @@
         down: function() { this.pressDirection(this.DIRECTION.DOWN); },
 
         /**
-         * Press action button (Space/Enter)
+         * Press action button (Enter key directly)
          */
-        action: function() { this.pressDirection(this.DIRECTION.ACTION); },
+        action: function() { this.pressKey(13); },
 
         /**
          * Press cancel button (Backspace)
@@ -261,9 +261,9 @@
         releaseDown: function() { this.releaseDirection(this.DIRECTION.DOWN); },
 
         /**
-         * Release action button
+         * Release action button (Enter key directly)
          */
-        releaseAction: function() { this.releaseDirection(this.DIRECTION.ACTION); },
+        releaseAction: function() { this.releaseKey(13); },
 
         /**
          * Release cancel button
