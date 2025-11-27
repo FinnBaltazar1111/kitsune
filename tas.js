@@ -141,6 +141,106 @@
         },
 
         /**
+         * Trigger the currently focused/selected UI button (gates, menus, etc.)
+         * Gates use CreateJS event dispatch on specific display objects, not canvas events.
+         * This finds the focused button (KI) and dispatches its event.
+         */
+        triggerFocusedButton: function() {
+            // Try to find the game controller and its focused button
+            if (typeof Wv !== 'undefined' && Wv && Wv.Jc) {
+                const controller = Wv.Jc;
+                // Look for focused menu item (KI) in the current scene
+                if (controller.fm && controller.fm.KI) {
+                    const focusedItem = controller.fm.KI;
+                    // Get the button component (wi type)
+                    if (focusedItem.ec && typeof wi !== 'undefined') {
+                        const buttonComponent = focusedItem.ec.get(wi);
+                        if (buttonComponent && buttonComponent.eventId) {
+                            // Dispatch the event directly
+                            controller.dispatchEvent(buttonComponent.eventId);
+                            console.log('[TAS] Triggered focused button event: ' + buttonComponent.eventId);
+                            return true;
+                        }
+                    }
+                    // Alternative: try dispatching click directly on the focused item
+                    if (focusedItem.dispatchEvent) {
+                        focusedItem.dispatchEvent('click');
+                        console.log('[TAS] Dispatched click on focused item');
+                        return true;
+                    }
+                }
+            }
+            console.warn('[TAS] No focused button found to trigger');
+            return false;
+        },
+
+        /**
+         * Simulate a stage click using CreateJS stage events
+         * This triggers stagemousedown/stagemouseup which CreateJS buttons listen to
+         */
+        stageClick: function() {
+            if (typeof Wv !== 'undefined' && Wv && Wv.stage) {
+                const stage = Wv.stage;
+                // CreateJS uses _handlePointerDown internally
+                // Dispatch stage events that buttons listen to
+                const mockEvent = {
+                    stageX: stage.canvas.width / 2,
+                    stageY: stage.canvas.height / 2,
+                    rawX: stage.canvas.width / 2,
+                    rawY: stage.canvas.height / 2,
+                    type: 'stagemousedown'
+                };
+                stage.dispatchEvent('stagemousedown', mockEvent);
+                stage.dispatchEvent('stagemouseup', mockEvent);
+                stage.dispatchEvent('click', mockEvent);
+                console.log('[TAS] Stage click dispatched');
+                return true;
+            }
+            console.warn('[TAS] Stage not found');
+            return false;
+        },
+
+        /**
+         * Simulate touch in the right action area (where gates are detected)
+         * Touch handler (Hh) checks if touch is in Rectangle(624, 108, 288, 405)
+         * and sets Bd identifier for action button detection
+         */
+        touchAction: function() {
+            if (!this._inputManager) {
+                console.warn('[TAS] Not initialized');
+                return;
+            }
+            // Get touch handler (Hh) - it's at inputManager.fe
+            const touchHandler = this._inputManager.fe;
+            if (touchHandler) {
+                // Set the Bd identifier to simulate touch in action area
+                // This makes yI(4) return true (action button pressed)
+                touchHandler.Bd = 999; // Any non-null value
+                console.log('[TAS] Touch action area activated (Bd set)');
+                return true;
+            }
+            console.warn('[TAS] Touch handler not found');
+            return false;
+        },
+
+        /**
+         * Release touch action area
+         */
+        releaseTouchAction: function() {
+            if (!this._inputManager) {
+                console.warn('[TAS] Not initialized');
+                return;
+            }
+            const touchHandler = this._inputManager.fe;
+            if (touchHandler) {
+                touchHandler.Bd = null;
+                console.log('[TAS] Touch action area released (Bd cleared)');
+                return true;
+            }
+            return false;
+        },
+
+        /**
          * Simulate a mouse click at the center of the game canvas
          * Some UI elements (like gates) may require click events instead of keyboard
          */
