@@ -141,6 +141,86 @@
         },
 
         /**
+         * Simulate a mouse click at the center of the game canvas
+         * Some UI elements (like gates) may require click events instead of keyboard
+         */
+        click: function() {
+            const canvas = document.querySelector('canvas');
+            if (!canvas) {
+                console.warn('[TAS] No canvas found');
+                return;
+            }
+            const rect = canvas.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            // Dispatch mouse events
+            const mouseDown = new MouseEvent('mousedown', {
+                bubbles: true,
+                cancelable: true,
+                clientX: centerX,
+                clientY: centerY
+            });
+            const mouseUp = new MouseEvent('mouseup', {
+                bubbles: true,
+                cancelable: true,
+                clientX: centerX,
+                clientY: centerY
+            });
+            const click = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                clientX: centerX,
+                clientY: centerY
+            });
+
+            canvas.dispatchEvent(mouseDown);
+            canvas.dispatchEvent(mouseUp);
+            canvas.dispatchEvent(click);
+            console.log('[TAS] Click dispatched at center (' + centerX + ', ' + centerY + ')');
+        },
+
+        /**
+         * Simulate a mouse click at specific coordinates
+         * @param {number} x - X coordinate relative to canvas
+         * @param {number} y - Y coordinate relative to canvas
+         */
+        clickAt: function(x, y) {
+            const canvas = document.querySelector('canvas');
+            if (!canvas) {
+                console.warn('[TAS] No canvas found');
+                return;
+            }
+            const rect = canvas.getBoundingClientRect();
+            const clientX = rect.left + x;
+            const clientY = rect.top + y;
+
+            const mouseDown = new MouseEvent('mousedown', {
+                bubbles: true,
+                cancelable: true,
+                clientX: clientX,
+                clientY: clientY
+            });
+            const mouseUp = new MouseEvent('mouseup', {
+                bubbles: true,
+                cancelable: true,
+                clientX: clientX,
+                clientY: clientY
+            });
+            const click = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                clientX: clientX,
+                clientY: clientY
+            });
+
+            canvas.dispatchEvent(mouseDown);
+            canvas.dispatchEvent(mouseUp);
+            canvas.dispatchEvent(click);
+            console.log('[TAS] Click dispatched at (' + x + ', ' + y + ')');
+        },
+
+        /**
          * Simulate pressing a direction
          * @param {number} direction - Direction index (0-5)
          *
