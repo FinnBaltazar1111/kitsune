@@ -3,6 +3,5 @@ Clone of [**kitsuneoffline**](https://github.com/LiEnby/kitsuneoffline) modified
 
 ## Planned updates
 * Somehow add support for installing new versions (probably not gonna happen)
-* Preload & cache resources so game can be played online if it is loaded beforehand
 > [!TIP]
 > Submit feature requests via Issues. I'll do my best to address them.
