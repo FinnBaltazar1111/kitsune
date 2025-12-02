@@ -239,11 +239,14 @@ self.addEventListener('fetch', (event) => {
       }
 
       // Try to match by pathname for local resources
+      // Extract just the filename from the requested pathname
+      const requestedFilename = pathname.replace(/^.*\//, '');
       const matchingKey = keys.find((key) => {
         const keyUrl = new URL(key.url);
+        const cachedFilename = keyUrl.pathname.replace(/^.*\//, '');
         return keyUrl.pathname === pathname ||
                keyUrl.pathname.endsWith(pathname.replace(/^\//, '')) ||
-               pathname.endsWith(keyUrl.pathname.replace(/^.*\//, ''));
+               requestedFilename === cachedFilename;
       });
 
       if (matchingKey) {
